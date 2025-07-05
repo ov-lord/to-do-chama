@@ -1,4 +1,4 @@
-// Firebase imports
+// 🔌 Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore,
@@ -12,7 +12,7 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ✅ Your Firebase configuration
+// ✅ Your Firebase config (to-doc-chama)
 const firebaseConfig = {
   apiKey: "AIzaSyAbJ96lstjJG13h_Vvrv8O98agNnIlysq0",
   authDomain: "to-doc-chama.firebaseapp.com",
@@ -22,22 +22,18 @@ const firebaseConfig = {
   appId: "1:777431365417:web:e725886e0d3a4262e7e938"
 };
 
-// ✅ Initialize Firebase with your project
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const tasksRef = collection(db, "tasks");
 const tasksQuery = query(tasksRef, orderBy("createdAt", "asc")); // oldest first
 
-// DOM Elements
+// ✅ MAIN APP LOGIC
 const addBtn = document.getElementById("addTask");
 const taskList = document.getElementById("taskList");
-const taskNameInput = document.getElementById("taskName");
-const taskTypeSelect = document.getElementById("taskType");
 
-// Add Task
 addBtn.onclick = async () => {
-  const name = taskNameInput.value.trim();
-  const type = taskTypeSelect.value;
+  const name = document.getElementById("taskName").value.trim();
+  const type = document.getElementById("taskType").value;
   if (!name) return alert("Enter a task name");
 
   await addDoc(tasksRef, {
@@ -46,10 +42,9 @@ addBtn.onclick = async () => {
     createdAt: Date.now()
   });
 
-  taskNameInput.value = "";
+  document.getElementById("taskName").value = "";
 };
 
-// Render a single task
 function renderTask(docSnapshot) {
   const data = docSnapshot.data();
   const now = Date.now();
@@ -67,7 +62,6 @@ function renderTask(docSnapshot) {
   const taskDiv = document.createElement("div");
   taskDiv.className = "task";
 
-  // Color coding for non-Certificat tasks
   if (data.type !== "Certificat") {
     const hours = Math.floor(diffMs / (1000 * 60 * 60));
     if (hours >= 120) taskDiv.classList.add("red");
@@ -78,7 +72,7 @@ function renderTask(docSnapshot) {
   info.className = "task-info";
   info.innerHTML = `<strong>${data.name}</strong> — <span class="task-timer">${timerText}</span>`;
 
-  // Update dropdown
+  // 🛠️ Update Dropdown
   const typeSelect = document.createElement("select");
   const options = [
     "Acouplement", "To Sereniter", "From Sereniter", "To Sereniter Bébé",
@@ -99,7 +93,6 @@ function renderTask(docSnapshot) {
     });
   };
 
-  // Delete button
   const delBtn = document.createElement("button");
   delBtn.textContent = "Delete";
   delBtn.onclick = async () => {
@@ -109,12 +102,21 @@ function renderTask(docSnapshot) {
   taskDiv.appendChild(info);
   taskDiv.appendChild(typeSelect);
   taskDiv.appendChild(delBtn);
-
   taskList.appendChild(taskDiv);
 }
 
-// Real-time listener to tasks
+// 🔁 Real-time update
 onSnapshot(tasksQuery, (snapshot) => {
   taskList.innerHTML = "";
   snapshot.forEach(renderTask);
 });
+
+// Optional: refresh every 60 seconds
+/*
+setInterval(() => {
+  taskList.innerHTML = "";
+  onSnapshot(tasksQuery, (snapshot) => {
+    snapshot.forEach(renderTask);
+  });
+}, 60000);
+*/
